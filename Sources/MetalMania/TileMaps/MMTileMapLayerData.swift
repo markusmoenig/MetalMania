@@ -70,7 +70,6 @@ public class MMTileMapLayerData  : Decodable {
         
         if let data = try container.decodeIfPresent([Int].self, forKey: .data) {
             self.data = data
-            print(data)
         }
     }
 }

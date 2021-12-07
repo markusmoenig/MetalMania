@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  MMTileMapLayer.swift
 //  
 //
 //  Created by Markus Moenig on 7/12/21.
