@@ -47,10 +47,34 @@ public class MMTileSetData  : Decodable {
         if let columns = try container.decodeIfPresent(Int.self, forKey: .columns) {
             self.columns = columns
         }
-        
-        //children = try container.decode([SignedObject]?.self, forKey: .children)
-        //code = try container.decode(Data?.self, forKey: .code)
-        
-        //session = "__project_session\(SignedObject.sessionCounter)"
     }
 }
+
+/// The reference to a MMTileSet inside a MMTileMap
+public class MMTileSetRefData  : Decodable {
+    
+    public var source        : String = ""
+    public var firstgid      : Int = 0
+
+    private enum CodingKeys : String, CodingKey {
+        case source
+        case firstgid
+    }
+    
+    required public init(from decoder: Decoder) throws
+    {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        if let source = try container.decodeIfPresent(String.self, forKey: .source) {
+            self.source = source
+            let array = source.split(separator: ".")
+            if array.count == 2 {
+                self.source = String(array[0])
+            }
+        }
+        
+        if let firstgid = try container.decodeIfPresent(Int.self, forKey: .firstgid) {
+            self.firstgid = firstgid
+        }
+    }
+}
+

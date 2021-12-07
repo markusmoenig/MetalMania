@@ -7,18 +7,23 @@
 
 import Foundation
 
-open class MMTileMap {
+open class MMTileMap : MMWidget {
     
-    let mmView          : MMView
+    static var tileSetManager   : MMTileSetManager? = nil
     
-    var fileName        : String
+    var fileName                : String
     
-    //var texture         : MTLTexture? = nil
-    var tileMapData     : MMTileMapData! = nil
+    var tileMapData             : MMTileMapData! = nil
+    
+    var layers                  : [MMTileMapLayer] = []
     
     public init(_ mmView: MMView, fileName: String) {
-        self.mmView = mmView
         self.fileName = fileName
+        super.init(mmView)
+        
+        if MMTileMap.tileSetManager == nil {
+            MMTileMap.tileSetManager = MMTileSetManager(mmView)
+        }
     }
     
     public func load() -> MMTileMapData? {
@@ -28,6 +33,7 @@ open class MMTileMap {
             
             tileMapData = try? JSONDecoder().decode(MMTileMapData.self, from: data)
 
+            return tileMapData
             /*
             if let tileSetData = tileSetData {
                 
@@ -45,5 +51,12 @@ open class MMTileMap {
              */
         }
         return nil
+    }
+    
+    /// Initializes the layers from the loaded layer data
+    func initLayers() {
+        layers = []
+        for tileSetDataRef in tileMapData.tilesets {
+        }
     }
 }

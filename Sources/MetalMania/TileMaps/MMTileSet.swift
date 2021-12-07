@@ -40,7 +40,6 @@ open class MMTileSet {
             }
             
             return tileSetData
-            print("data", tileSetData)
         }
         return nil
     }
