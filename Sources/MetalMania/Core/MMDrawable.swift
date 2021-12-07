@@ -403,18 +403,30 @@ public class MMDrawTexture : MMDrawable
         mmRenderer = renderer
     }
     
-    func draw( _ texture: MTLTexture, x: Float, y: Float, zoom: Float = 1, fragment: MMFragment? = nil, prem: Bool = false, round: Float = 0, roundingRect: SIMD4<Float> = SIMD4<Float>(0,0,0,0))
+    public func draw( _ texture: MTLTexture, x: Float, y: Float, zoom: Float = 1, subRect: MMRect? = nil, fragment: MMFragment? = nil)
     {
         let scaleFactor : Float = mmRenderer.mmView.scaleFactor
-        let width : Float = Float(texture.width)
-        let height: Float = Float(texture.height)
-
+        var width : Float = Float(texture.width)
+        var height: Float = Float(texture.height)
+        
+        var sr = float4(0,0,1,1)
+        
+        if let subRect = subRect {
+            sr.x = subRect.x / width
+            sr.y = subRect.y / height
+            sr.z = subRect.width / width
+            sr.w = subRect.height / height
+            
+            width = subRect.width;
+            height = subRect.height;
+        }
+        
         let settings: [Float] = [
             mmRenderer.width, mmRenderer.height,
             x, y,
             width * scaleFactor, height * scaleFactor,
-            prem == true ? 1 : 0, round,
-            roundingRect.x, roundingRect.y, roundingRect.z, roundingRect.w
+            0, 0,
+            sr.x, sr.y, sr.z, sr.w
         ];
         
         let renderEncoder = fragment == nil ? mmRenderer.renderEncoder! : fragment!.renderEncoder!

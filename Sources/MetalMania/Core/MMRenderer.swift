@@ -357,9 +357,7 @@ public class MMRenderer : NSObject, MTKViewDelegate {
             float2 screenSize;
             float2 pos;
             float2 size;
-            float  prem;
-            float  round;
-            float4 roundingRect;
+            float4 subRect;
 
         } MM_TEXTURE;
 
@@ -760,25 +758,12 @@ public class MMRenderer : NSObject, MTKViewDelegate {
             float2 uv = in.textureCoordinate;// * data->screenSize;
             uv.y = 1 - uv.y;
             
+            uv *= data->subRect.zw;
+            uv += data->subRect.xy;
+
             const half4 colorSample = inTexture.sample (textureSampler, uv );
                 
-            float4 sample = float4( colorSample );
-
-            if (data->round > 0) {
-                float2 uv = in.textureCoordinate * data->size;
-                uv -= float2( data->size / 2.0 ) + data->roundingRect.xy;
-                
-                float2 d = abs( uv ) - data->roundingRect.zw + data->round;
-                float dist = length(max(d,float2(0))) + min(max(d.x,d.y),0.0) - data->round;
-                
-                sample.w *= mmFillMask(dist);
-            }
-            
-            if (data->prem == 1) {
-                return float4(sample.x / sample.w, sample.y / sample.w, sample.z / sample.w, sample.w);
-            } else {
-                return sample;
-            }
+            return float4( colorSample );
         }
 
         float mmMedian(float r, float g, float b) {

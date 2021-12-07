@@ -259,20 +259,22 @@ open class MMView : MMBaseView {
     }
     
     /// Creates a MTLTexture from the given resource
-    func loadTexture(_ name: String ) -> MTLTexture?
+    func loadTexture(_ name: String, type: String = "tiff") -> MTLTexture?
     {
-        let path = Bundle.main.path(forResource: name, ofType: "tiff")!
-        let data = NSData(contentsOfFile: path)! as Data
-        
-        let options: [MTKTextureLoader.Option : Any] = [.generateMipmaps : true, .SRGB : false]
-        
-        return try? textureLoader.newTexture(data: data, options: options)
+        if let path = Bundle.main.path(forResource: name, ofType: type) {
+            let data = NSData(contentsOfFile: path)! as Data
+            
+            let options: [MTKTextureLoader.Option : Any] = [.generateMipmaps : true, .SRGB : false]
+            
+            return try? textureLoader.newTexture(data: data, options: options)
+        }
+        return nil
     }
 
     /// Registers an icon texture of the given name in the icons dictionary
-    @discardableResult func registerIcon(_ name: String) -> MTLTexture?
+    @discardableResult public func registerIcon(_ name: String, type: String = "tiff") -> MTLTexture?
     {
-        if let texture = loadTexture(name) {
+        if let texture = loadTexture(name, type: type) {
             icons[name] = texture
             return texture
         }
