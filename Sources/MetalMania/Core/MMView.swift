@@ -114,6 +114,15 @@ open class MMView : MMBaseView {
         drawArc = MMDrawArc( renderer )
     }
     
+    /// Installs the widget as the main and only widget for the given region
+    public func installForRegion(widget: MMWidget, region: MMRegion.MMRegionType) {
+        let reg = MMRegion(self, type: region, widget: widget)
+        
+        if region == .editor {
+            editorRegion = reg
+        }
+    }
+    
     /// Build the user interface for this view. Called for each frame inside the renderer.
     func build()
     {

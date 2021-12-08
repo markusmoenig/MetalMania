@@ -9,6 +9,14 @@ import Foundation
 
 public class MMTileSetData  : Decodable {
     
+    public enum Orientation {
+        case orthogonal
+    }
+    
+    public enum Order {
+        case rightDown
+    }
+    
     public var name         : String = ""
 
     public var tileWidth    : Int = 0
@@ -17,6 +25,9 @@ public class MMTileSetData  : Decodable {
     public var columns      : Int = 0
 
     public var imageName    : String = ""
+    
+    public var orientation  : Orientation = .orthogonal
+    public var order        : Order = .rightDown
 
     private enum CodingKeys : String, CodingKey {
         case name
@@ -24,14 +35,28 @@ public class MMTileSetData  : Decodable {
         case tileheight
         case columns
         case image
+        case orientation
+        case order
     }
     
     required public init(from decoder: Decoder) throws
     {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        //id = try container.decode(UUID.self, forKey: .id)
+
         if let name = try container.decodeIfPresent(String.self, forKey: .name) {
             self.name = name
+        }
+        
+        if let orientation = try container.decodeIfPresent(String.self, forKey: .orientation) {
+            if orientation == "orthogonal" {
+                self.orientation = .orthogonal
+            }
+        }
+        
+        if let order = try container.decodeIfPresent(String.self, forKey: .order) {
+            if order == "right-down" {
+                self.order = .rightDown
+            }
         }
         
         if let imageName = try container.decodeIfPresent(String.self, forKey: .image) {
@@ -44,6 +69,7 @@ public class MMTileSetData  : Decodable {
         if let tileHeight = try container.decodeIfPresent(Int.self, forKey: .tileheight) {
             self.tileHeight = tileHeight
         }
+        
         if let columns = try container.decodeIfPresent(Int.self, forKey: .columns) {
             self.columns = columns
         }

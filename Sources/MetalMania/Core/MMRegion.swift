@@ -12,24 +12,35 @@ open class MMRegion
 {
     public enum MMRegionType
     {
-        case Left, Top, Right, Bottom, Editor
+        case left, top, right, bottom, editor
     }
     
-    public var rect        : MMRect
-    public let mmView      : MMView
+    public var rect         : MMRect
+    public let mmView       : MMView
     
-    public let type        : MMRegionType
+    public let type         : MMRegionType
+    
+    public let widget       : MMWidget?
 
-    public init( _ view: MMView, type: MMRegionType )
+    public init(_ view: MMView, type: MMRegionType, widget: MMWidget? = nil)
     {
         mmView = view
         rect = MMRect()
         
+        self.widget = widget
         self.type = type
+        
+        if let widget = widget {
+            registerWidgets(widgets: widget)
+        }
     }
     
     open func build()
     {
+        if let widget = widget {
+            widget.rect.copy(rect)
+            widget.draw()
+        }
     }
     
     public func layoutH( startX: Float, startY: Float, spacing: Float, widgets: MMWidget... )

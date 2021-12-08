@@ -7,11 +7,13 @@
 
 import MetalKit
 
+/// A reference to a single tile
 public struct MMTile {
-    var texture             : MTLTexture? = nil
+    weak var texture        : MTLTexture? = nil
     var subRect             : MMRect? = nil
 }
 
+/// A tileset
 open class MMTileSet {
     
     let mmView              : MMView
@@ -32,6 +34,7 @@ open class MMTileSet {
         }
     }
     
+    /// Load the tileset assets
     @discardableResult public func load() -> MMTileSetData? {
         
         if let path = Bundle.main.path(forResource: fileName, ofType: "json") {
@@ -55,13 +58,24 @@ open class MMTileSet {
         return nil
     }
     
+    /// Return the tile at the given grid id
     func getTile(id: Int) -> MMTile {
         
         var tileTexture : MTLTexture? = nil
         var tileSubRect : MMRect? = nil
-        
+                
+        let tWidth = Float(tileSetData.tileWidth)
+        let tHeight = Float(tileSetData.tileHeight)
+
         tileTexture = texture
-        tileSubRect = MMRect(0, 0, Float(tileSetData.tileWidth), Float(tileSetData.tileHeight))
+        
+        if tileSetData.order == .rightDown {
+            
+            let xOff = Float(id % tileSetData.columns)
+            let yOff = Float(id / tileSetData.columns)
+
+            tileSubRect = MMRect(xOff * tWidth, yOff * tWidth, tWidth, tHeight)
+        }
         
         return MMTile(texture: tileTexture, subRect: tileSubRect)
     }

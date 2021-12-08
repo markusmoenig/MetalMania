@@ -55,13 +55,32 @@ open class MMTileMap : MMWidget {
             layers.append(layer)
         }
         
+        /// Returns the name of the tileset for the given tile gid
+        func getTileRefForId(_ id: Int) -> MMTileSetRefData? {
+            
+            var startgid        : Int = -1
+            var tileRef         : MMTileSetRefData? = nil
+            
+            for tileSetDataRef in tileMapData.tilesets {
+
+                if tileSetDataRef.firstgid <= id && tileSetDataRef.firstgid > startgid {
+                    startgid = tileSetDataRef.firstgid
+                    tileRef = tileSetDataRef
+                }
+            }
+            
+            return tileRef
+        }
+        
         // Now create ALL the tile structs for the whole map
         
         for layer in layers {
             for t in layer.layerData.data {
                 if t > 0 {
                     if tiles[t] == nil {
-                        tiles[t] = MMTileMap.tileSetManager.getTile(tileSetName: "ground", id: t)
+                        if let tileRef = getTileRefForId(t) {
+                            tiles[t] = MMTileMap.tileSetManager.getTile(tileSetName: tileRef.source, id: t - tileRef.firstgid)
+                        }
                     }                    
                 }
             }
