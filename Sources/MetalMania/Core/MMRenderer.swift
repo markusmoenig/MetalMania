@@ -752,8 +752,8 @@ public class MMRenderer : NSObject, MTKViewDelegate {
                                         constant MM_TEXTURE *data [[ buffer(0) ]],
                                         texture2d<half> inTexture [[ texture(1) ]])
         {
-            constexpr sampler textureSampler (mag_filter::linear,
-                                              min_filter::linear);
+            constexpr sampler textureSampler (mag_filter::nearest,
+                                              min_filter::nearest);
             
             float2 uv = in.textureCoordinate;// * data->screenSize;
             uv.y = 1 - uv.y;

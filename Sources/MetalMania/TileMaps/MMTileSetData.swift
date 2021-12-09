@@ -28,6 +28,8 @@ public class MMTileSetData  : Decodable {
     
     public var orientation  : Orientation = .orthogonal
     public var order        : Order = .rightDown
+    
+    public var tileObjects  : [MMTileObjectRefData] = []
 
     private enum CodingKeys : String, CodingKey {
         case name
@@ -37,6 +39,7 @@ public class MMTileSetData  : Decodable {
         case image
         case orientation
         case order
+        case tiles
     }
     
     required public init(from decoder: Decoder) throws
@@ -73,6 +76,10 @@ public class MMTileSetData  : Decodable {
         if let columns = try container.decodeIfPresent(Int.self, forKey: .columns) {
             self.columns = columns
         }
+        
+        if let tiles = try container.decodeIfPresent([MMTileObjectRefData].self, forKey: .tiles) {
+            self.tileObjects = tiles
+        }
     }
 }
 
@@ -100,6 +107,31 @@ public class MMTileSetRefData  : Decodable {
         
         if let firstgid = try container.decodeIfPresent(Int.self, forKey: .firstgid) {
             self.firstgid = firstgid
+        }
+    }
+}
+
+/// The reference to a MMTileObjectGroupData inside a tileset
+public class MMTileObjectRefData  : Decodable {
+    
+    public var id            : Int = 0
+    public var objectGroup   : MMTileObjectGroupData! = nil
+
+    private enum CodingKeys : String, CodingKey {
+        case id
+        case objectgroup
+    }
+    
+    required public init(from decoder: Decoder) throws
+    {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        if let id = try container.decodeIfPresent(Int.self, forKey: .id) {
+            self.id = id
+        }
+        
+        if let objectGroup = try container.decodeIfPresent(MMTileObjectGroupData.self, forKey: .objectgroup) {
+            self.objectGroup = objectGroup
         }
     }
 }

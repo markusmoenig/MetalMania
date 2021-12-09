@@ -18,6 +18,9 @@ open class MMTileMap : MMWidget {
     var layers                  : [MMTileMapLayer] = []
     var tiles                   : [Int: MMTile] = [:]
     
+    public var offsetX          : Float = 0
+    public var offsetY          : Float = 0
+
     public init(_ mmView: MMView, fileName: String) {
         self.fileName = fileName
         super.init(mmView)
@@ -87,30 +90,49 @@ open class MMTileMap : MMWidget {
         }
     }
     
+    /// Returns the obect data for the given objectName
+    public func getObject(ofName: String) -> MMTileObjectData? {
+        for layer in layers {
+            
+            if layer.layerData.type == .objectGroup {
+                for o in layer.layerData.objects {
+                    if o.name == ofName {
+                        return o
+                    }
+                }
+            }
+        }
+        return nil
+    }
+    
+    /// Draws the layers
     open override func draw(xOffset: Float = 0, yOffset: Float = 0) {
 
         for layer in layers {
             
-            var x : Float = 0
-            var y : Float = 0
-            
-            var rowCounter = 0
+            if layer.layerData.type == .tile && layer.layerData.visible == true {
+                
+                var x : Float = offsetX * zoom + Float(layer.layerData.x) * zoom
+                var y : Float = offsetY * zoom + Float(layer.layerData.y) * zoom
+                
+                var rowCounter = 0
 
-            for t in layer.layerData.data {
-                if t > 0 {
-                    
-                    if let tile = tiles[t] {
-                        mmView.drawTexture.draw(tile.texture!, x: x, y: y, subRect: tile.subRect)
+                for t in layer.layerData.data {
+                    if t > 0 {
+                        
+                        if let tile = tiles[t] {
+                            mmView.drawTexture.draw(tile.texture!, x: x, y: y, zoom: 1/zoom, subRect: tile.subRect)
+                        }
                     }
-                }
-                
-                rowCounter += 1
-                
-                x += Float(tileMapData.tileWidth)
-                if rowCounter == tileMapData.width {
-                    x = 0
-                    rowCounter = 0
-                    y += Float(tileMapData.tileHeight)
+                    
+                    rowCounter += 1
+                    
+                    x += Float(tileMapData.tileWidth) * zoom
+                    if rowCounter == tileMapData.width {
+                        x = offsetX * zoom
+                        rowCounter = 0
+                        y += Float(tileMapData.tileHeight) * zoom
+                    }
                 }
             }
         }

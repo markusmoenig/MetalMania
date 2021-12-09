@@ -112,6 +112,12 @@ public class MMRect
         self.height -= y * 2
     }
     
+    /// Returns the center
+    public func center() -> float2
+    {
+        return float2(x + width / 2, y + height / 2)
+    }
+    
     /// Clears the rect
     public func clear()
     {

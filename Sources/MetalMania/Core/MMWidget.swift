@@ -57,12 +57,12 @@ open class MMWidget
     var name        : String! = "MMWidget"
     
     var mmView      : MMView
-    public var rect        : MMRect
+    public var rect : MMRect
     var id          : Int
     var clicked     : ((_ event: MMMouseEvent)->())?
     
     var isDisabled  : Bool = false
-    var zoom        : Float = 1
+    public var zoom : Float = 1
     
     var dropTargets : [String]
         
