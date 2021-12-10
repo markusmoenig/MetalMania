@@ -20,11 +20,23 @@ open class MMTileMap : MMWidget {
     
     public var offsetX          : Float = 0
     public var offsetY          : Float = 0
+    
+    // Physics related
+    
+    /// The Box2D world for this map
+    var box2DWorld              : b2World
 
+    /// Set automatically to the tile height of the map, you can set it to a custom value before called load().
+    var ppm                     : Float = 0
+    
     public init(_ mmView: MMView, fileName: String) {
-        self.fileName = fileName
-        super.init(mmView)
         
+        self.fileName = fileName
+        
+        box2DWorld = b2World(gravity: b2Vec2(0, 10))
+        
+        super.init(mmView)
+                
         if MMTileMap.tileSetManager == nil {
             MMTileMap.tileSetManager = MMTileSetManager(mmView)
         }
@@ -36,8 +48,13 @@ open class MMTileMap : MMWidget {
             let data = NSData(contentsOfFile: path)! as Data
             
             tileMapData = try? JSONDecoder().decode(MMTileMapData.self, from: data)
+            
+            if ppm == 0 {
+                ppm = Float(tileMapData.tileHeight)
+            }
 
             initLayersAndTiles()
+            initPhysics()
             return tileMapData
         }
         return nil
@@ -85,6 +102,50 @@ open class MMTileMap : MMWidget {
                             tiles[t] = MMTileMap.tileSetManager.getTile(tileSetName: tileRef.source, id: t - tileRef.firstgid)
                         }
                     }                    
+                }
+            }
+        }
+    }
+    
+    /// Init physiycs
+    func initPhysics() {
+        
+        func setupTilePhysics(x: Float, y: Float, tile: MMTile, object: MMTileObjectData) {
+            print(x, y, tile.tileId, object.y)
+            
+            var bodyDef = b2BodyDef()
+        }
+        
+        // Parse all tiles and set up physics for them
+        for layer in layers {
+            
+            if layer.layerData.type == .tile && layer.layerData.visible == true {
+                
+                var x : Float = offsetX * zoom + Float(layer.layerData.x) * zoom
+                var y : Float = offsetY * zoom + Float(layer.layerData.y) * zoom
+                
+                var rowCounter = 0
+
+                for t in layer.layerData.data {
+                    if t > 0 {
+                        
+                        if let tile = tiles[t] {
+                            if let objectGroup = tile.tileSet?.objects[tile.tileId] {
+                                for o in objectGroup.objects {
+                                    setupTilePhysics(x: x, y: y, tile: tile, object: o)
+                                }
+                            }
+                        }
+                    }
+                    
+                    rowCounter += 1
+                    
+                    x += Float(tileMapData.tileWidth) * zoom
+                    if rowCounter == tileMapData.width {
+                        x = offsetX * zoom
+                        rowCounter = 0
+                        y += Float(tileMapData.tileHeight) * zoom
+                    }
                 }
             }
         }

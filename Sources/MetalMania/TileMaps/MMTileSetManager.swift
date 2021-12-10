@@ -22,14 +22,6 @@ class MMTileSetManager {
         if tileSets[byFileName] == nil {
             let tileSet = MMTileSet(mmView, fileName: byFileName)
             tileSets[byFileName] = tileSet
-            
-            /*
-            for object in tileSet.tileSetData.tileObjects {
-                print(object.id, object.objectGroup)
-                for o in object.objectGroup.objects {
-                    print(o.name, o.rect.x, o.rect.width)
-                }
-            }*/
         }
     }
     

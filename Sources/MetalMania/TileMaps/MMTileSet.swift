@@ -9,8 +9,14 @@ import MetalKit
 
 /// A reference to a single tile
 public struct MMTile {
+    
+    // For display
     weak var texture        : MTLTexture? = nil
     var subRect             : MMRect? = nil
+    
+    // For reference    
+    weak var tileSet        : MMTileSet? = nil
+    var tileId              : Int = -1
 }
 
 /// A tileset
@@ -24,6 +30,9 @@ open class MMTileSet {
     
     public var texture      : MTLTexture? = nil
     public var tileSetData  : MMTileSetData! = nil
+    
+    /// The references to the object group data for each tile
+    public var objects      : [Int: MMTileObjectGroupData] = [:]
     
     public init(_ mmView: MMView, fileName: String) {
         self.mmView = mmView
@@ -51,6 +60,11 @@ open class MMTileSet {
                         texture = mmView.loadTexture(String(array[0]), type: String(array[1]))
                     }
                 }
+                
+                // Parse the object groups and store them for easier access
+                for object in tileSetData.tileObjects {
+                    objects[object.id] = object.objectGroup
+                }
             }
             
             return tileSetData
@@ -77,6 +91,6 @@ open class MMTileSet {
             tileSubRect = MMRect(xOff * tWidth, yOff * tWidth, tWidth, tHeight)
         }
         
-        return MMTile(texture: tileTexture, subRect: tileSubRect)
+        return MMTile(texture: tileTexture, subRect: tileSubRect, tileSet: self, tileId: id)
     }
 }
