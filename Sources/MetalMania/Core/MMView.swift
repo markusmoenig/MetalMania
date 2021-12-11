@@ -298,7 +298,7 @@ open class MMView : MMBaseView {
     }
 
     /// Increases the counter which locks the framerate at the max
-    func lockFramerate(_ hard: Bool = false)
+    public func lockFramerate(_ hard: Bool = false)
     {
         maxFramerateLocks += 1
         isPaused = false
@@ -310,7 +310,7 @@ open class MMView : MMBaseView {
     }
     
     /// Decreases the counter which locks the framerate and sets it back to the default rate when <= 0
-    func unlockFramerate(_ hard: Bool = false)
+    public func unlockFramerate(_ hard: Bool = false)
     {
         maxFramerateLocks -= 1
         if hard {

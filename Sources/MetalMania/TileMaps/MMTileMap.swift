@@ -9,14 +9,16 @@ import Foundation
 
 open class MMTileMap : MMWidget {
     
-    static var tileSetManager   : MMTileSetManager! = nil
+    static public var tileSetManager : MMTileSetManager! = nil
     
     var fileName                : String
     
-    var tileMapData             : MMTileMapData! = nil
+    public var tileMapData      : MMTileMapData! = nil
     
-    var layers                  : [MMTileMapLayer] = []
-    var tiles                   : [Int: MMTile] = [:]
+    public var layers           : [MMTileMapLayer] = []
+    public var tiles            : [Int: MMTile] = [:]
+    
+    public var actors           : [MMActor] = []
     
     public var offsetX          : Float = 0
     public var offsetY          : Float = 0
@@ -42,6 +44,7 @@ open class MMTileMap : MMWidget {
         }
     }
     
+    /// Loads all dependencies like tilesets, tiles and initializes physics
     @discardableResult public func load() -> MMTileMapData? {
         
         if let path = Bundle.main.path(forResource: fileName, ofType: "json") {
@@ -110,12 +113,6 @@ open class MMTileMap : MMWidget {
     /// Init physiycs
     func initPhysics() {
         
-        func setupTilePhysics(x: Float, y: Float, tile: MMTile, object: MMTileObjectData) {
-            print(x, y, tile.tileId, object.y)
-            
-            var bodyDef = b2BodyDef()
-        }
-        
         // Parse all tiles and set up physics for them
         for layer in layers {
             
@@ -132,7 +129,7 @@ open class MMTileMap : MMWidget {
                         if let tile = tiles[t] {
                             if let objectGroup = tile.tileSet?.objects[tile.tileId] {
                                 for o in objectGroup.objects {
-                                    setupTilePhysics(x: x, y: y, tile: tile, object: o)
+                                    tile.box2DBody = setupTilePhysics(x: x, y: y, object: o)
                                 }
                             }
                         }
@@ -151,10 +148,59 @@ open class MMTileMap : MMWidget {
         }
     }
     
+    /// Setup the physics for one tile
+    func setupTilePhysics(x: Float, y: Float, object: MMTileObjectData, type: b2BodyType = .staticBody) -> b2Body? {
+        
+        let bodyDef = b2BodyDef()
+        
+        //bodyDef.angle = 0
+        bodyDef.type = type
+                
+        let fixtureDef = b2FixtureDef()
+        fixtureDef.shape = nil
+
+        //fixtureDef.filter.categoryBits = categoryBits
+        //fixtureDef.filter.maskBits = 0xffff
+        
+        let polyShape = b2PolygonShape()
+        polyShape.setAsBox(halfWidth: object.width / 2.0 / ppm - polyShape.m_radius, halfHeight: object.height / 2.0 / ppm - polyShape.m_radius)
+        fixtureDef.shape = polyShape
+        
+        fixtureDef.friction = 0.1
+        if type == .staticBody {
+            fixtureDef.density = 0
+        } else {
+            fixtureDef.density = 0.1
+        }
+        fixtureDef.restitution = 0
+        
+        let aspect = float2(1,1)
+        
+        bodyDef.position.set((x / aspect.x) / ppm, (y / aspect.y) / ppm)
+        
+        let body = box2DWorld.createBody(bodyDef)
+        body.createFixture(fixtureDef)
+        
+        return body
+    }
+    
+    /// Creates a new actor
+    public func createActor(name: String) -> MMActor {
+        
+        let actor = MMActor(tileMap: self)
+        
+        if let object = getObject(ofName: name) {
+            actor.setObjectData(objectData: object)
+        }
+        
+        actors.append(actor)
+        
+        return actor
+    }
+    
     /// Returns the obect data for the given objectName
     public func getObject(ofName: String) -> MMTileObjectData? {
         for layer in layers {
-            
             if layer.layerData.type == .objectGroup {
                 for o in layer.layerData.objects {
                     if o.name == ofName {
@@ -169,6 +215,12 @@ open class MMTileMap : MMWidget {
     /// Draws the layers
     open override func draw(xOffset: Float = 0, yOffset: Float = 0) {
 
+        let timeStep: b2Float = 1.0 / 60.0
+        let velocityIterations = 6
+        let positionIterations = 2
+    
+        box2DWorld.step(timeStep: timeStep, velocityIterations: velocityIterations, positionIterations: positionIterations)
+        
         for layer in layers {
             
             if layer.layerData.type == .tile && layer.layerData.visible == true {
@@ -182,7 +234,7 @@ open class MMTileMap : MMWidget {
                     if t > 0 {
                         
                         if let tile = tiles[t] {
-                            mmView.drawTexture.draw(tile.texture!, x: x, y: y, zoom: 1/zoom, subRect: tile.subRect)
+                            drawTile(x: x, y: y, tile: tile)
                         }
                     }
                     
@@ -195,6 +247,23 @@ open class MMTileMap : MMWidget {
                         y += Float(tileMapData.tileHeight) * zoom
                     }
                 }
+            }
+        }
+        
+        for a in actors {
+            a.draw()
+        }
+    }
+    
+    func drawTile(x: Float, y: Float, tile: MMTile) {
+        if let animation = tile.animation, animation.isEmpty == false {
+            let first = animation.first
+            if let texture = first?.texture {
+                mmView.drawTexture.draw(texture, x: x, y: y, zoom: 1/zoom, subRect: first!.subRect)
+            }
+        } else {
+            if let texture = tile.texture {
+                mmView.drawTexture.draw(texture, x: x, y: y, zoom: 1/zoom, subRect: tile.subRect)
             }
         }
     }

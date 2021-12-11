@@ -7,7 +7,7 @@
 
 import Foundation
 
-class MMTileSetManager {
+public class MMTileSetManager {
     
     let mmView              : MMView
     
@@ -18,11 +18,16 @@ class MMTileSetManager {
     }
     
     /// Adds a tileset of the given file name
-    func addTileSet(byFileName: String) {
+    @discardableResult public func addTileSet(byFileName: String, load: Bool = false) -> MMTileSet? {
         if tileSets[byFileName] == nil {
             let tileSet = MMTileSet(mmView, fileName: byFileName)
+            if load {
+                tileSet.load()
+            }
             tileSets[byFileName] = tileSet
+            return tileSet
         }
+        return nil
     }
     
     /// Returns the tile of the given id from the given tileSet

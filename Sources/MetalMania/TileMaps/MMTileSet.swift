@@ -8,15 +8,40 @@
 import MetalKit
 
 /// A reference to a single tile
-public struct MMTile {
+public class MMTile {
     
     // For display
-    weak var texture        : MTLTexture? = nil
-    var subRect             : MMRect? = nil
+    let texture             : MTLTexture?
+    let subRect             : MMRect?
     
     // For reference    
-    weak var tileSet        : MMTileSet? = nil
-    var tileId              : Int = -1
+    let tileSet             : MMTileSet?
+    let tileId              : Int
+    
+    // Optional Animation data
+    var animation           : [MMTile]? = nil
+    
+    var currDuration        : Int = 0
+    var currIndex           : Int = 0
+    
+    var duration            : Int = 10
+    
+    // Box2D body
+    var box2DBody           : b2Body? = nil
+        
+    init(texture: MTLTexture? = nil, subRect: MMRect? = nil, tileSet: MMTileSet, tileId: Int) {
+        self.texture = texture
+        self.subRect = subRect
+        self.tileSet = tileSet
+        self.tileId = tileId
+    }
+    
+    init() {
+        self.texture = nil
+        self.subRect = nil
+        tileSet = nil
+        tileId = -1
+    }
 }
 
 /// A tileset
@@ -33,6 +58,9 @@ open class MMTileSet {
     
     /// The references to the object group data for each tile
     public var objects      : [Int: MMTileObjectGroupData] = [:]
+    
+    /// The references to the animation data for each tile
+    public var animations   : [Int: MMTile] = [:]
     
     public init(_ mmView: MMView, fileName: String) {
         self.mmView = mmView
@@ -61,9 +89,24 @@ open class MMTileSet {
                     }
                 }
                 
-                // Parse the object groups and store them for easier access
+                // Parse the object's groups and animations and store them for easier access
                 for object in tileSetData.tileObjects {
                     objects[object.id] = object.objectGroup
+                                                            
+                    if object.animation.isEmpty == false {
+                        
+                        let animTile = MMTile()
+                        var animData : [MMTile] = []
+                        
+                        for a in object.animation {
+                            let t = getTile(id: a.tileid)
+                            print("11", t.texture, a.tileid)
+                            animData.append(t)
+                        }
+                        
+                        animTile.animation = animData
+                        animations[object.id] = animTile
+                    }
                 }
             }
             
@@ -72,8 +115,12 @@ open class MMTileSet {
         return nil
     }
     
+    public func getAnimation(id: Int) -> MMTile? {
+        return animations[id]
+    }
+    
     /// Return the tile at the given grid id
-    func getTile(id: Int) -> MMTile {
+    public func getTile(id: Int) -> MMTile {
         
         var tileTexture : MTLTexture? = nil
         var tileSubRect : MMRect? = nil

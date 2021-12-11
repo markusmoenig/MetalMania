@@ -35,8 +35,8 @@ public class MMMouseEvent
 
 public class MMKeyEvent
 {
-    var characters  : String?
-    var keyCode     : UInt16
+    public var characters  : String?
+    public var keyCode     : UInt16
     
     init(_ characters: String?,_ keyCode: UInt16 )
     {

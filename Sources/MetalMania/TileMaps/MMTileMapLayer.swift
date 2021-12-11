@@ -7,7 +7,7 @@
 
 import Foundation
 
-class MMTileMapLayer {
+public class MMTileMapLayer {
  
     let mmView              : MMView
     

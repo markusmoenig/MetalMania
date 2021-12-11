@@ -116,10 +116,12 @@ public class MMTileObjectRefData  : Decodable {
     
     public var id            : Int = 0
     public var objectGroup   : MMTileObjectGroupData! = nil
+    public var animation     : [MMTileAnimationData] = []
 
     private enum CodingKeys : String, CodingKey {
         case id
         case objectgroup
+        case animation
     }
     
     required public init(from decoder: Decoder) throws
@@ -133,6 +135,34 @@ public class MMTileObjectRefData  : Decodable {
         if let objectGroup = try container.decodeIfPresent(MMTileObjectGroupData.self, forKey: .objectgroup) {
             self.objectGroup = objectGroup
         }
+        
+        if let animation = try container.decodeIfPresent([MMTileAnimationData].self, forKey: .animation) {
+            self.animation = animation
+        }
     }
 }
 
+/// An animated tile
+public class MMTileAnimationData  : Decodable {
+    
+    public var tileid        : Int = 0
+    public var duration      : Int = 0
+
+    private enum CodingKeys : String, CodingKey {
+        case tileid
+        case duration
+    }
+    
+    required public init(from decoder: Decoder) throws
+    {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        if let tileid = try container.decodeIfPresent(Int.self, forKey: .tileid) {
+            self.tileid = tileid
+        }
+
+        if let duration = try container.decodeIfPresent(Int.self, forKey: .duration) {
+            self.duration = duration
+        }
+    }
+}
