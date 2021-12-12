@@ -129,7 +129,7 @@ open class MMTileMap : MMWidget {
                         if let tile = tiles[t] {
                             if let objectGroup = tile.tileSet?.objects[tile.tileId] {
                                 for o in objectGroup.objects {
-                                    tile.box2DBody = setupTilePhysics(x: x, y: y, object: o)
+                                    tile.box2DBody = setupTilePhysics(x: x, y: y, tileSize: float2(o.width, o.height))
                                 }
                             }
                         }
@@ -149,7 +149,7 @@ open class MMTileMap : MMWidget {
     }
     
     /// Setup the physics for one tile
-    func setupTilePhysics(x: Float, y: Float, object: MMTileObjectData, type: b2BodyType = .staticBody) -> b2Body? {
+    func setupTilePhysics(x: Float, y: Float, tileSize: float2, type: b2BodyType = .staticBody) -> b2Body? {
         
         let bodyDef = b2BodyDef()
         
@@ -161,22 +161,22 @@ open class MMTileMap : MMWidget {
 
         //fixtureDef.filter.categoryBits = categoryBits
         //fixtureDef.filter.maskBits = 0xffff
-        
+                
         let polyShape = b2PolygonShape()
-        polyShape.setAsBox(halfWidth: object.width / 2.0 / ppm - polyShape.m_radius, halfHeight: object.height / 2.0 / ppm - polyShape.m_radius)
+        polyShape.setAsBox(halfWidth: tileSize.x / 2.0 / ppm - polyShape.m_radius, halfHeight: tileSize.y / 2.0 / ppm - polyShape.m_radius)
         fixtureDef.shape = polyShape
         
-        fixtureDef.friction = 0.1
+        fixtureDef.friction = 0.3
         if type == .staticBody {
             fixtureDef.density = 0
         } else {
             fixtureDef.density = 0.1
         }
-        fixtureDef.restitution = 0
+        fixtureDef.restitution = 0.2
         
         let aspect = float2(1,1)
         
-        bodyDef.position.set((x / aspect.x) / ppm, (y / aspect.y) / ppm)
+        bodyDef.position.set((x / aspect.x) / ppm, (y / aspect.y - tileSize.y / 2.0) / ppm)
         
         let body = box2DWorld.createBody(bodyDef)
         body.createFixture(fixtureDef)

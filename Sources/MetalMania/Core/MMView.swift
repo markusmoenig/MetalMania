@@ -121,6 +121,8 @@ open class MMView : MMBaseView {
         if region == .editor {
             editorRegion = reg
         }
+        
+        focusWidget = widget
     }
     
     /// Build the user interface for this view. Called for each frame inside the renderer.

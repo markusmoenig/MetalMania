@@ -42,6 +42,27 @@ public class MMTile {
         tileSet = nil
         tileId = -1
     }
+    
+    /// Returns the resolution of this tile
+    func getResolution() -> float2 {
+        if let texture = texture {
+            if let subRect = subRect {
+                return subRect.size()
+            } else {
+                return float2(Float(texture.width), Float(texture.height))
+            }
+        } else
+        if let animation = animation, animation.isEmpty == false {
+            if let texture = animation[0].texture {
+                if let subRect = animation[0].subRect {
+                    return subRect.size()
+                } else {
+                    return float2(Float(texture.width), Float(texture.height))
+                }
+            }
+        }
+        return float2()
+    }
 }
 
 /// A tileset
@@ -100,7 +121,6 @@ open class MMTileSet {
                         
                         for a in object.animation {
                             let t = getTile(id: a.tileid)
-                            print("11", t.texture, a.tileid)
                             animData.append(t)
                         }
                         

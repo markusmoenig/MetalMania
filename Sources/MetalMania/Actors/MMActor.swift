@@ -31,8 +31,6 @@ open class MMActor {
         
         x = objectData.x
         y = objectData.y
-        
-        body = tileMap.setupTilePhysics(x: x, y: y, object: objectData, type: .dynamicBody)
     }
     
     /// Adds a named tile for the actor and optionally makes it the default tile
@@ -41,6 +39,10 @@ open class MMActor {
         if makeDefault {
             currentTile = tile
             defaultTile = tile
+            
+            let res = tile.getResolution()
+            print(res)
+            body = tileMap.setupTilePhysics(x: x, y: y, tileSize: res, type: .dynamicBody)
         }
     }
     

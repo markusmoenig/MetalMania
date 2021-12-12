@@ -118,6 +118,11 @@ public class MMRect
         return float2(x + width / 2, y + height / 2)
     }
     
+    /// Returns the size of the rect
+    public func size() -> float2 {
+        return float2(width, height)
+    }
+    
     /// Clears the rect
     public func clear()
     {
